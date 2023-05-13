@@ -37,7 +37,7 @@ jobs:
     - name: Get Version from Tag
       if: startsWith(github.event.ref, 'refs/tags/v')
       id: tagver      
-      uses: ChrSchu90/GitTagSemanticVersion@main
+      uses: ChrSchu90/GitTagSemanticVersion@v1
     - name: Pack Release NuGets      
       if: steps.tagver.outputs.is_prerelease == 'False'
       run: dotnet pack --no-restore --output ${{ github.workspace }}/packages /p:Version=${{ steps.tagver.outputs.version }}
