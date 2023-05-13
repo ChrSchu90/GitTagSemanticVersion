@@ -51,8 +51,6 @@ jobs:
 
 ## Inputs
 
-The following outputs can be accessed via `${{ steps.<step-id>.outputs }}` from this action
-
 | Name         | Type   | Description                                                                         |
 | ------------ | ------ | ----------------------------------------------------------------------------------- |
 | `tag`        | String | [optional] Tag where the version info gets extracted from. Default is `github.ref`  |
