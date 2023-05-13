@@ -1,0 +1,49 @@
+name: Git Tag Semantic Version
+author: ChrSchu90
+description: >
+  Gets the version information by the Git tag.
+  The tag reqires a "v" as prefix followed by a Semantic Version 2.0.0 (see https://semver.org/) 
+  Format: v[Major].[Minor].[Patch]-<pre-release>+<buildmetadata>
+  Pre-Release and Build Metadata are optional
+branding:
+  icon: tag
+  color: blue
+inputs:
+  tag:
+    description: 'Git tag (default = github.ref)'
+    required: false
+    default: ${{ github.ref }}
+outputs:
+  version_tag:
+    description: "The clean version tag e.g. v1.2.3-beta+asvdd without the git ref prefix"
+    value: ${{ steps.tagver.outputs.version_tag }}
+  version:
+    description: "Version without pre-release or build metadata (Major.Minor.Patch)"
+    value: ${{ steps.tagver.outputs.version }}
+  major:
+    description: "Major version number"
+    value: ${{ steps.tagver.outputs.major }}
+  minor:
+    description: "Minor version number"
+    value: ${{ steps.tagver.outputs.minor }}
+  patch:
+    description: "Patch version number"
+    value: ${{ steps.tagver.outputs.patch }}
+  suffix:
+    description: "Pre-release tag without - (e.g. beta, beta3, alpha, alpha5)"
+    value: ${{ steps.tagver.outputs.suffix }}
+  metadata:
+    description: "Metadata tag without + (e.g. asf343o23432o4432o4n2)"
+    value: ${{ steps.tagver.outputs.metadata }}
+  package:
+    description: "Package version for NuGet (Major.Minor.Patch-Suffix)"
+    value: ${{ steps.tagver.outputs.package }}
+  is_prerelease:
+    description: "Boolean that defines if the version is a prerelease (suffix defined)"
+    value: ${{ steps.tagver.outputs.is_prerelease }}
+runs:
+  using: composite
+  steps:
+    - run: ${{ github.action_path }}/action.ps1 "${{ inputs.tag }}"
+      id: tagver
+      shell: pwsh
