@@ -1,10 +1,7 @@
 name: Git Tag Semantic Version
 author: ChrSchu90
 description: >
-  Gets the version information by the Git tag.
-  The tag reqires a "v" as prefix followed by a Semantic Version 2.0.0 (see https://semver.org/) 
-  Format: v[Major].[Minor].[Patch]-<pre-release>+<buildmetadata>
-  Pre-Release and Build Metadata are optional
+  Gets the version information by the Git tag (*v[Major].[Minor].[Patch]-<pre-release>+<buildmetadata>).
 branding:
   icon: tag
   color: blue
