@@ -36,16 +36,16 @@ jobs:
       run: dotnet test --no-restore --no-build
     - name: Get Version from Tag
       if: startsWith(github.event.ref, 'refs/tags/v')
-      id: tagver      
-      uses: ChrSchu90/GitTagSemanticVersion@v1
-    - name: Pack Release NuGets      
-      if: steps.tagver.outputs.is_prerelease == 'False'
+      id: tagver
+      uses: ChrSchu90/GitTagSemanticVersion@v1.1
+    - name: Pack Release NuGets
+      if: ${{ steps.tagver.outputs.is_release == 'true' }}
       run: dotnet pack --no-restore --output ${{ github.workspace }}/packages /p:Version=${{ steps.tagver.outputs.version }}
     - name: Pack Prerelease NuGets
-      if: steps.tagver.outputs.is_prerelease == 'True'
+      if: ${{ steps.tagver.outputs.is_prerelease == 'true' }}
       run: dotnet pack --no-restore --output ${{ github.workspace }}/packages /p:VersionPrefix=${{ steps.tagver.outputs.version }} --version-suffix ${{ steps.tagver.outputs.suffix }}
     - name: Push NuGets
-      if: steps.tagver.outcome == 'success'
+      if: ${{ steps.tagver.outputs.is_valid == 'true' }}
       run: dotnet nuget push ${{ github.workspace }}/packages/*.nupkg --source ${{ secrets.NUGET_FEED }} --skip-duplicate --api-key ${{ secrets.NUGET_API_KEY }}
 ```
 
@@ -57,19 +57,22 @@ jobs:
 
 ## Outputs
 
-The following outputs can be accessed via `${{ steps.<step-id>.outputs }}` from this action
+The following outputs can be accessed via `${{ steps.<step-id>.outputs }}`. 
+Note that boolean output variables needs to be handled like strings, otherwise it could lead into unexpected behaviors!
 
-| Name            | Type   | Description                                                                |
-| --------------- | ------ | -------------------------------------------------------------------------- |
-| `version_tag`   | String | The clean version tag e.g. v1.2.3-beta+asvdd without the git ref prefix    |
-| `version`       | String | Version without pre-release or build metadata (Major.Minor.Patch)          |
-| `major`         | String | Major version number                                                       |
-| `minor`         | String | Minor version number                                                       |
-| `patch`         | String | Patch version number                                                       |
-| `suffix`        | String | Pre-release tag without `-` (e.g. beta, beta3, alpha, alpha5)              |
-| `metadata`      | String | Metadata tag without `+` (e.g. asf343o23432o4432o4n2)                      |
-| `package`       | String | Package version for NuGet (major.minor.patch-suffix)                       |
-| `is_prerelease` | String | `True` if the version is a pre-release (suffix defined), otherwise `False` |
+| Name            | Type   | Description                                                                   |
+| --------------- | ------ | ----------------------------------------------------------------------------- |
+| `version_tag`   | String | The clean version tag (e.g. v1.2.3-beta1+as4at5dd) without the git ref prefix |
+| `version`       | String | Version without pre-release or build metadata (e.g. 1.2.3)                    |
+| `major`         | String | Major version number (e.g. 1)                                                 |
+| `minor`         | String | Minor version number (e.g. 2)                                                 |
+| `patch`         | String | Patch version number (e.g. 3)                                                 |
+| `suffix`        | String | Pre-release tag without `-` (e.g. beta1)                                      |
+| `metadata`      | String | Metadata tag without `+` (e.g. as4at5dd)                                      |
+| `package`       | String | Package version for NuGet with suffix if defined (e.g. 1.2.3-beta1)           |
+| `is_valid`      | String | `true` if the version tag was valid and could be processed, otherwise `false` |
+| `is_prerelease` | String | `true` if the version is a pre-release (suffix defined), otherwise `false`    |
+| `is_release`    | String | `true` if the version is a release (no suffix defined), otherwise `false`     |
 
 ## Notes
 - This action requires `pwsh` to actually be available and on PATH of the runner - which

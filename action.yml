@@ -35,9 +35,15 @@ outputs:
   package:
     description: "Package version for NuGet (Major.Minor.Patch-Suffix)"
     value: ${{ steps.tagver.outputs.package }}
+  is_valid:
+    description: "Boolean that defines if the given version tag was valid and could be processed"
+    value: ${{ steps.tagver.outputs.is_valid == 'True' }}
+  is_release:
+    description: "Boolean that defines if the version is a release (no suffix defined)"
+    value: ${{ steps.tagver.outputs.is_valid == 'True' && steps.tagver.outputs.is_prerelease == 'False' }}
   is_prerelease:
     description: "Boolean that defines if the version is a prerelease (suffix defined)"
-    value: ${{ steps.tagver.outputs.is_prerelease }}
+    value: ${{ steps.tagver.outputs.is_valid == 'True' && steps.tagver.outputs.is_prerelease == 'True' }}
 runs:
   using: composite
   steps:

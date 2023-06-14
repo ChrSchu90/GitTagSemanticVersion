@@ -1,11 +1,20 @@
 #!/usr/bin/env pwsh
 
+function WriteVariable {
+    Param([string]$name, [string]$value)
+    Write-Host "[info] $name = $value"
+    echo "$name=$value" >> $env:GITHUB_OUTPUT
+}
+
 #$tag = git describe --tags --abbrev=0
 $tag = $args[0]
 Write-Host "[info] Tag = $tag"
 
 $semVer2Regex = [Regex] '(?<versiontag>(V|v)(?<version>(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*))(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$'
-if (-not $semVer2Regex.IsMatch($tag)) {
+
+$isValid = $semVer2Regex.IsMatch($tag)
+WriteVariable -name "is_valid" -value "$isValid"
+if (-not $isValid) {
     throw "Invalid version tag format! See: https://semver.org/"
 }
 
@@ -31,21 +40,12 @@ if($metadata.Success) {
     $versionMetadata = $metadata.Value
 }
 
-Write-Host "[info] version_tag = $versionTag"
-echo "version_tag=$versionTag" >> $env:GITHUB_OUTPUT
-Write-Host "[info] is_prerelease = $isPrerelease"
-echo "is_prerelease=$isPrerelease" >> $env:GITHUB_OUTPUT
-Write-Host "[info] version = $version"
-echo "version=$version" >> $env:GITHUB_OUTPUT
-Write-Host "[info] major = $major"
-echo "major=$major" >> $env:GITHUB_OUTPUT
-Write-Host "[info] minor = $minor"
-echo "minor=$minor" >> $env:GITHUB_OUTPUT
-Write-Host "[info] patch = $patch"
-echo "patch=$patch" >> $env:GITHUB_OUTPUT
-Write-Host "[info] suffix = $versionSuffix"
-echo "suffix=$versionSuffix" >> $env:GITHUB_OUTPUT
-Write-Host "[info] metadata = $versionMetadata"
-echo "metadata=$versionMetadata" >> $env:GITHUB_OUTPUT
-Write-Host "[info] package = $packageVersion"
-echo "package=$packageVersion" >> $env:GITHUB_OUTPUT
+WriteVariable -name "is_prerelease" -value "$isPrerelease"
+WriteVariable -name "version_tag" -value $versionTag
+WriteVariable -name "version" -value $version
+WriteVariable -name "major" -value $major
+WriteVariable -name "minor" -value $minor
+WriteVariable -name "patch" -value $patch
+WriteVariable -name "suffix" -value $versionSuffix
+WriteVariable -name "metadata" -value $versionMetadata
+WriteVariable -name "package" -value $packageVersion
